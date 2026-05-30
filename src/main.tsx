@@ -9,11 +9,9 @@ import {
   Gauge,
   Grid3X3,
   Layers3,
-  Monitor,
   Palette,
   Smartphone,
   Sparkles,
-  Tablet,
   Wand2,
 } from "lucide-react";
 import "./styles.css";
@@ -33,7 +31,6 @@ type SitePalette = {
   };
 };
 
-type PreviewSize = "desktop" | "tablet" | "mobile";
 type RuleView = "phi" | "thirds" | "contrast" | "blindness";
 
 const starterPalettes: SitePalette[] = [
@@ -191,7 +188,6 @@ function App() {
   const [mood, setMood] = React.useState("спокойно");
   const [palettes, setPalettes] = React.useState(starterPalettes);
   const [selected, setSelected] = React.useState(starterPalettes[0]);
-  const [previewSize, setPreviewSize] = React.useState<PreviewSize>("desktop");
   const [ruleView, setRuleView] = React.useState<RuleView>("phi");
 
   const generate = () => {
@@ -211,7 +207,7 @@ function App() {
         </a>
         <nav className="nav" aria-label="Разделы">
           <a href="#generator">Палитры</a>
-          <a href="#preview">Пример</a>
+          <a href="#experience">Пример</a>
           <a href="#rules">Правила</a>
         </nav>
       </header>
@@ -275,41 +271,7 @@ function App() {
           </div>
         </aside>
 
-        <section className="live-area" id="preview" aria-label="Живой предпросмотр">
-          <div className="preview-toolbar">
-            <div>
-              <p>Живой пример</p>
-              <h2>Клик по палитре меняет весь сайт</h2>
-            </div>
-            <div className="segmented" aria-label="Размер предпросмотра">
-              <IconToggle
-                active={previewSize === "desktop"}
-                label="Desktop"
-                onClick={() => setPreviewSize("desktop")}
-              >
-                <Monitor size={17} />
-              </IconToggle>
-              <IconToggle
-                active={previewSize === "tablet"}
-                label="Tablet"
-                onClick={() => setPreviewSize("tablet")}
-              >
-                <Tablet size={17} />
-              </IconToggle>
-              <IconToggle
-                active={previewSize === "mobile"}
-                label="Mobile"
-                onClick={() => setPreviewSize("mobile")}
-              >
-                <Smartphone size={17} />
-              </IconToggle>
-            </div>
-          </div>
-
-          <div className={`site-preview ${previewSize}`}>
-            <PreviewMockup ruleView={ruleView} />
-          </div>
-        </section>
+        <ExperienceSection ruleView={ruleView} />
       </section>
 
       <section className="rules" id="rules">
@@ -355,69 +317,51 @@ function App() {
   );
 }
 
-function IconToggle({
-  active,
-  children,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  children: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
+function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
   return (
-    <button
-      className={active ? "icon-toggle active" : "icon-toggle"}
-      onClick={onClick}
-      title={label}
-      type="button"
-    >
-      {children}
-      <span className="sr-only">{label}</span>
-    </button>
-  );
-}
-
-function PreviewMockup({ ruleView }: { ruleView: RuleView }) {
-  return (
-    <div className="mock-page">
-      <div className="mock-nav">
-        <strong>Academy</strong>
-        <span>Курсы</span>
-        <span>Отзывы</span>
-        <button type="button">Записаться</button>
+    <section className="experience" id="experience" aria-label="Живой пример сайта">
+      <div className="experience-heading">
+        <p>Живой пример</p>
+        <h2>Этот сайт и есть пример выбранной палитры</h2>
       </div>
-      <section className="mock-hero">
+
+      <section className="example-hero">
         {ruleView === "thirds" && <div className="thirds-overlay" aria-hidden="true" />}
         {ruleView === "phi" && <div className="phi-overlay" aria-hidden="true" />}
-        <div className="mock-copy">
+        <div className="example-copy">
           <span className="eyebrow">Дизайн без хаоса</span>
-          <h3>Научитесь собирать визуально сильные сайты</h3>
+          <h3>Подберите палитру и сразу почувствуйте сайт</h3>
           <p>
-            Палитра сразу проверяется на кнопках, карточках, тексте и акцентах.
+            Цвета проверяются на настоящем интерфейсе: фоне, навигации, кнопках,
+            карточках, тексте и визуальных правилах ниже.
           </p>
-          <div className="mock-actions">
-            <button type="button">Начать</button>
-            <button className="ghost" type="button">Смотреть план</button>
+          <div className="example-actions">
+            <button type="button">Начать подбор</button>
+            <button className="ghost" type="button">Смотреть правила</button>
           </div>
         </div>
-        <div className="mock-visual" aria-hidden="true">
+        <div className="example-visual" aria-hidden="true">
+          <span />
           <span />
           <span />
           <span />
         </div>
       </section>
-      <div className="mock-grid">
-        {["Композиция", "Контраст", "Адаптив"].map((item) => (
-          <article key={item}>
+
+      <div className="example-grid">
+        {[
+          ["Композиция", "сетки и пропорции видны на странице"],
+          ["Контраст", "кнопки и текст проверяются сразу"],
+          ["Адаптив", "блоки перестраиваются без отдельного макета"],
+        ].map(([title, text]) => (
+          <article key={title}>
             <i />
-            <strong>{item}</strong>
-            <span>Проверка на живом блоке</span>
+            <strong>{title}</strong>
+            <span>{text}</span>
           </article>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 

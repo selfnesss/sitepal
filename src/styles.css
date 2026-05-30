@@ -64,11 +64,10 @@ a {
 .brand,
 .nav,
 .panel-title,
-.preview-toolbar,
+.experience-heading,
 .rules-heading,
 .segmented,
-.mock-nav,
-.mock-actions {
+.example-actions {
   display: flex;
   align-items: center;
 }
@@ -101,14 +100,13 @@ a {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(18rem, 26rem) minmax(0, 1fr);
+  grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr);
   gap: clamp(1rem, 3vw, 2rem);
   padding: clamp(1rem, 4vw, 3rem);
   align-items: start;
 }
 
 .panel,
-.live-area,
 .rules {
   border: 1px solid color-mix(in srgb, var(--muted), transparent 80%);
   background: color-mix(in srgb, var(--surface), transparent 8%);
@@ -116,7 +114,7 @@ a {
 }
 
 .panel,
-.live-area {
+.rules {
   border-radius: 0.5rem;
 }
 
@@ -139,7 +137,7 @@ a {
 }
 
 .panel-title p,
-.preview-toolbar p,
+.experience-heading p,
 .rules-heading p {
   margin: 0 0 0.2rem;
   color: var(--muted);
@@ -196,8 +194,7 @@ h2 {
 .generate,
 .palette-card,
 .icon-toggle,
-.mock-nav button,
-.mock-actions button {
+.example-actions button {
   border: 0;
   cursor: pointer;
 }
@@ -212,8 +209,7 @@ h2 {
 .chip.active,
 .generate,
 .icon-toggle.active,
-.mock-nav button,
-.mock-actions button:first-child {
+.example-actions button:first-child {
   background: var(--primary);
   color: var(--surface);
 }
@@ -272,16 +268,16 @@ h2 {
   display: block;
 }
 
-.live-area {
+.experience {
   min-width: 0;
-  padding: clamp(1rem, 2vw, 1.25rem);
+  display: grid;
+  gap: clamp(1rem, 2vw, 1.35rem);
 }
 
-.preview-toolbar,
+.experience-heading,
 .rules-heading {
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
 }
 
 .segmented {
@@ -301,69 +297,26 @@ h2 {
   color: var(--muted);
 }
 
-.site-preview {
-  width: 100%;
-  margin: 0 auto;
-  transition: max-width 180ms ease;
-}
-
-.site-preview.desktop {
-  max-width: 68rem;
-}
-
-.site-preview.tablet {
-  max-width: 45rem;
-}
-
-.site-preview.mobile {
-  max-width: 22rem;
-}
-
-.mock-page {
+.example-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(14rem, 0.84fr);
+  gap: clamp(1rem, 4vw, 3rem);
+  min-height: clamp(28rem, 58vh, 42rem);
+  padding: clamp(1.4rem, 5vw, 4.5rem);
+  align-items: center;
   overflow: hidden;
   border-radius: 0.5rem;
-  background: var(--surface);
-  color: var(--text);
+  background:
+    radial-gradient(circle at 84% 18%, color-mix(in srgb, var(--accent), transparent 72%), transparent 15rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--secondary), transparent 12%), color-mix(in srgb, var(--surface), transparent 28%));
   border: 1px solid color-mix(in srgb, var(--muted), transparent 80%);
 }
 
-.mock-nav {
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--muted), transparent 82%);
-}
-
-.mock-nav span {
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
-.mock-nav button,
-.mock-actions button {
-  min-height: 2.35rem;
-  border-radius: 0.4rem;
-  padding: 0 0.9rem;
-  font-weight: 780;
-}
-
-.mock-hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.18fr) minmax(12rem, 0.72fr);
-  gap: clamp(1rem, 4vw, 3rem);
-  min-height: 26rem;
-  padding: clamp(1.25rem, 5vw, 4rem);
-  align-items: center;
-  background:
-    radial-gradient(circle at 82% 20%, color-mix(in srgb, var(--accent), transparent 76%), transparent 13rem),
-    linear-gradient(135deg, color-mix(in srgb, var(--secondary), transparent 18%), transparent);
-}
-
-.mock-copy {
+.example-copy {
   position: relative;
   z-index: 2;
-  max-width: 42rem;
+  max-width: 46rem;
 }
 
 .eyebrow {
@@ -375,82 +328,94 @@ h2 {
   font-size: 0.78rem;
 }
 
-.mock-copy h3 {
+.example-copy h3 {
   margin-bottom: 1rem;
-  font-size: clamp(2rem, 5vw, 4.4rem);
+  font-size: clamp(2.4rem, 6vw, 5.6rem);
   line-height: 0.98;
   letter-spacing: 0;
 }
 
-.mock-copy p {
+.example-copy p {
   max-width: 34rem;
   color: var(--muted);
   line-height: 1.7;
   font-size: clamp(1rem, 1.5vw, 1.12rem);
 }
 
-.mock-actions {
+.example-actions {
   gap: 0.7rem;
   flex-wrap: wrap;
 }
 
-.mock-actions .ghost {
+.example-actions button {
+  min-height: 2.65rem;
+  border-radius: 0.4rem;
+  padding: 0 1rem;
+  font-weight: 800;
+}
+
+.example-actions .ghost {
   background: color-mix(in srgb, var(--secondary), transparent 26%);
   color: var(--text);
 }
 
-.mock-visual {
+.example-visual {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 0.72fr;
-  grid-template-rows: 1fr 0.75fr;
-  gap: 0.85rem;
-  min-height: 18rem;
+  grid-template-columns: 1fr 0.64fr;
+  grid-template-rows: 1fr 0.62fr 0.42fr;
+  gap: 0.9rem;
+  min-height: 22rem;
 }
 
-.mock-visual span {
+.example-visual span {
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--surface), transparent 55%);
   background: color-mix(in srgb, var(--primary), transparent 8%);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text), transparent 88%);
 }
 
-.mock-visual span:nth-child(1) {
-  grid-row: 1 / 3;
+.example-visual span:nth-child(1) {
+  grid-row: 1 / 4;
   background: var(--primary);
 }
 
-.mock-visual span:nth-child(2) {
+.example-visual span:nth-child(2) {
   background: var(--accent);
 }
 
-.mock-visual span:nth-child(3) {
+.example-visual span:nth-child(3) {
   background: var(--secondary);
 }
 
-.mock-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  background: color-mix(in srgb, var(--muted), transparent 84%);
+.example-visual span:nth-child(4) {
+  background: color-mix(in srgb, var(--surface), var(--accent) 16%);
 }
 
-.mock-grid article {
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.example-grid article {
   display: grid;
   gap: 0.4rem;
-  min-height: 9rem;
+  min-height: 9.4rem;
   padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--muted), transparent 80%);
+  border-radius: 0.5rem;
   background: var(--surface);
 }
 
-.mock-grid i {
+.example-grid i {
   width: 2.1rem;
   height: 2.1rem;
   border-radius: 0.45rem;
   background: var(--accent);
 }
 
-.mock-grid span {
+.example-grid span {
   color: var(--muted);
 }
 
@@ -700,16 +665,7 @@ h2 {
   box-shadow: 0 1rem 2rem color-mix(in srgb, var(--text), transparent 84%);
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-@media (max-width: 980px) {
+@media (max-width: 820px) {
   .workspace,
   .rule-stage {
     grid-template-columns: 1fr;
@@ -720,9 +676,24 @@ h2 {
   }
 }
 
+@media (max-width: 1050px) and (min-width: 821px) {
+  .example-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .example-copy h3 {
+    font-size: clamp(2rem, 5vw, 3.3rem);
+  }
+
+  .example-visual {
+    min-height: 12rem;
+  }
+}
+
 @media (max-width: 720px) {
   .topbar,
-  .preview-toolbar,
+  .experience-heading,
   .rules-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -737,20 +708,16 @@ h2 {
     padding-inline: 0.75rem;
   }
 
-  .mock-nav span {
-    display: none;
-  }
-
-  .mock-hero {
+  .example-hero {
     grid-template-columns: 1fr;
     min-height: 0;
   }
 
-  .mock-visual {
-    min-height: 10rem;
+  .example-visual {
+    min-height: 12rem;
   }
 
-  .mock-grid,
+  .example-grid,
   .contrast-demo {
     grid-template-columns: 1fr;
   }
