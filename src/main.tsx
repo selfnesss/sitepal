@@ -327,7 +327,7 @@ function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
 
       <section className="example-hero">
         {ruleView === "thirds" && <div className="thirds-overlay" aria-hidden="true" />}
-        {ruleView === "phi" && <div className="phi-overlay" aria-hidden="true" />}
+        {ruleView === "phi" && <GoldenHeroOverlay />}
         <div className="example-copy">
           <span className="eyebrow">Дизайн без хаоса</span>
           <h3>Подберите палитру и сразу почувствуйте сайт</h3>
@@ -362,6 +362,19 @@ function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
         ))}
       </div>
     </section>
+  );
+}
+
+function GoldenHeroOverlay() {
+  return (
+    <div className="phi-overlay" aria-hidden="true">
+      <span className="phi-line vertical" />
+      <span className="phi-line horizontal" />
+      <span className="phi-label main">61.8%</span>
+      <span className="phi-label side">38.2%</span>
+      <span className="phi-label bottom">61.8 / 38.2</span>
+      <span className="phi-target" />
+    </div>
   );
 }
 
@@ -411,13 +424,48 @@ function RuleVisualization({ view }: { view: RuleView }) {
 
   return (
     <div className="visual-card phi-demo">
-      <div className="phi-box large" />
-      <div className="phi-box medium" />
-      <div className="phi-box small" />
-      <div className="phi-arc" />
+      <svg
+        className="golden-diagram"
+        viewBox="0 0 809 500"
+        role="img"
+        aria-label="Золотой прямоугольник с делением 61.8 на 38.2 и спиралью Фибоначчи"
+      >
+        <rect className="golden-bg" x="39" y="24" width="731.4" height="452" rx="0" />
+        <rect className="golden-main" x="39" y="24" width="452" height="452" />
+        <rect className="golden-side" x="491" y="24" width="279.4" height="452" />
+        <line className="golden-ratio-line" x1="491" y1="24" x2="491" y2="476" />
+        <line className="golden-ratio-line" x1="39" y1="303.3" x2="770.4" y2="303.3" />
+        <text className="golden-text" x="265" y="64" textAnchor="middle">
+          61.8%
+        </text>
+        <text className="golden-text" x="630.7" y="64" textAnchor="middle">
+          38.2%
+        </text>
+        <text className="golden-note" x="404" y="456" textAnchor="middle">
+          Пропорция 1.618:1
+        </text>
+
+        <g className="fib-grid" transform="translate(70 118) scale(0.62)">
+          <rect x="0" y="0" width="320" height="320" />
+          <rect x="320" y="0" width="200" height="200" />
+          <rect x="320" y="200" width="120" height="120" />
+          <rect x="440" y="200" width="80" height="80" />
+          <rect x="440" y="280" width="40" height="40" />
+          <rect x="480" y="280" width="40" height="40" />
+          <path
+            className="fib-spiral"
+            d="M 320 320 A 320 320 0 0 1 0 0
+               A 200 200 0 0 1 520 0
+               A 120 120 0 0 1 320 320
+               A 80 80 0 0 1 520 200
+               A 40 40 0 0 1 440 320
+               A 40 40 0 0 1 520 280"
+          />
+        </g>
+      </svg>
       <div className="visual-copy">
         <strong>Золотое сечение</strong>
-        <p>Главная зона шире вторичной примерно в пропорции 1.618.</p>
+        <p>Главная зона занимает 61.8%, вторичная 38.2%, а схема показывает спираль по квадратам Фибоначчи.</p>
       </div>
     </div>
   );
