@@ -12,6 +12,7 @@ import {
   Palette,
   Smartphone,
   Sparkles,
+  Upload,
   Wand2,
 } from "lucide-react";
 import goldenSpiralImage from "./assets/golden-spiral.svg";
@@ -202,6 +203,9 @@ function App() {
   const [selected, setSelected] = React.useState(starterPalettes[0]);
   const [ruleView, setRuleView] = React.useState<RuleView>("phi");
   const [copiedColor, setCopiedColor] = React.useState<string | null>(null);
+  const [analysisInput, setAnalysisInput] = React.useState("");
+  const [analysisUrl, setAnalysisUrl] = React.useState<string | null>(null);
+  const [analysisImage, setAnalysisImage] = React.useState<string | null>(null);
 
   const generate = () => {
     if (prompt.trim().length < 3) {
@@ -222,6 +226,39 @@ function App() {
       setCopiedColor(null);
     }
   };
+
+  const openAnalysisUrl = () => {
+    const trimmed = analysisInput.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    setAnalysisUrl(normalized);
+    setAnalysisImage(null);
+  };
+
+  const loadAnalysisImage = (file?: File) => {
+    if (!file) {
+      return;
+    }
+
+    const nextImage = URL.createObjectURL(file);
+    setAnalysisImage((previous) => {
+      if (previous) {
+        URL.revokeObjectURL(previous);
+      }
+      return nextImage;
+    });
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (analysisImage) {
+        URL.revokeObjectURL(analysisImage);
+      }
+    };
+  }, [analysisImage]);
 
   return (
     <main className="app" style={colorVars(selected)}>
@@ -368,6 +405,16 @@ function App() {
             ))}
           </div>
         </div>
+
+        <AnalysisLab
+          image={analysisImage}
+          input={analysisInput}
+          onImageChange={loadAnalysisImage}
+          onInputChange={setAnalysisInput}
+          onUrlOpen={openAnalysisUrl}
+          url={analysisUrl}
+          view={ruleView}
+        />
       </section>
 
       <a className="to-top" href="#workspace" aria-label="Наверх">
@@ -386,7 +433,7 @@ function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
       </div>
 
       <section className="example-hero">
-        {ruleView === "thirds" && <div className="thirds-overlay" aria-hidden="true" />}
+        {ruleView === "thirds" && <ThirdsOverlay />}
         <div className="example-copy">
           <span className="eyebrow">Дизайн без хаоса</span>
           <h3>Подберите палитру и сразу почувствуйте сайт</h3>
@@ -428,9 +475,7 @@ function RuleVisualization({ view }: { view: RuleView }) {
   if (view === "thirds") {
     return (
       <div className="visual-card thirds-demo">
-        <div className="thirds-overlay" />
-        <span className="focus-point one" />
-        <span className="focus-point two" />
+        <ThirdsOverlay />
         <div className="visual-copy">
           <strong>Правило третей</strong>
           <p>Ключевые объекты попадают в точки пересечения, взгляд считывает экран быстрее.</p>
@@ -480,6 +525,122 @@ function RuleVisualization({ view }: { view: RuleView }) {
         <strong>Золотое сечение</strong>
         <p>Вместо самодельной схемы используется готовое изображение золотого прямоугольника со спиралью.</p>
       </div>
+    </div>
+  );
+}
+
+function ThirdsOverlay() {
+  return (
+    <div className="thirds-overlay" aria-hidden="true">
+      <span className="thirds-point top-left" />
+      <span className="thirds-point top-right" />
+      <span className="thirds-point bottom-left" />
+      <span className="thirds-point bottom-right" />
+    </div>
+  );
+}
+
+function AnalysisLab({
+  image,
+  input,
+  onImageChange,
+  onInputChange,
+  onUrlOpen,
+  url,
+  view,
+}: {
+  image: string | null;
+  input: string;
+  onImageChange: (file?: File) => void;
+  onInputChange: (value: string) => void;
+  onUrlOpen: () => void;
+  url: string | null;
+  view: RuleView;
+}) {
+  return (
+    <section className="analysis-lab" aria-label="Анализ чужого сайта">
+      <div className="analysis-heading">
+        <div>
+          <p>Анализ сайта</p>
+          <h2>Подставьте сайт или скриншот под выбранное правило</h2>
+        </div>
+        <div className="analysis-controls">
+          <label className="analysis-url">
+            <span>URL</span>
+            <input
+              value={input}
+              onChange={(event) => onInputChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  onUrlOpen();
+                }
+              }}
+              placeholder="https://example.com"
+            />
+          </label>
+          <button className="analysis-action" onClick={onUrlOpen} type="button">
+            Открыть
+          </button>
+          <label className="analysis-upload">
+            <Upload size={17} />
+            Скриншот
+            <input
+              accept="image/*"
+              onChange={(event) => onImageChange(event.target.files?.[0])}
+              type="file"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="analysis-frame">
+        {image ? (
+          <img className="analysis-image" src={image} alt="Скриншот сайта для анализа" />
+        ) : url ? (
+          <iframe
+            src={url}
+            title="Сайт для анализа композиции"
+            loading="lazy"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+          />
+        ) : (
+          <div className="analysis-empty">
+            <strong>Добавьте URL или скриншот</strong>
+            <span>Поверх сайта появится выбранная рамка: сечение, трети, контраст или зона баннерной слепоты.</span>
+          </div>
+        )}
+        <AnalysisOverlay view={view} />
+      </div>
+    </section>
+  );
+}
+
+function AnalysisOverlay({ view }: { view: RuleView }) {
+  if (view === "thirds") {
+    return <ThirdsOverlay />;
+  }
+
+  if (view === "phi") {
+    return (
+      <div className="analysis-golden" aria-hidden="true">
+        <img src={goldenSpiralImage} alt="" />
+      </div>
+    );
+  }
+
+  if (view === "contrast") {
+    return (
+      <div className="analysis-contrast" aria-hidden="true">
+        <span />
+        <span />
+      </div>
+    );
+  }
+
+  return (
+    <div className="analysis-blindness" aria-hidden="true">
+      <span />
+      <span />
     </div>
   );
 }
