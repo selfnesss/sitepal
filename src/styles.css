@@ -31,6 +31,13 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent), transparent 12%);
+  outline-offset: 3px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -194,7 +201,8 @@ h2 {
 .generate,
 .palette-card,
 .icon-toggle,
-.example-actions button {
+.example-actions a,
+.color-value {
   border: 0;
   cursor: pointer;
 }
@@ -209,9 +217,14 @@ h2 {
 .chip.active,
 .generate,
 .icon-toggle.active,
-.example-actions button:first-child {
+.example-actions a:first-child {
   background: var(--primary);
   color: var(--surface);
+}
+
+.generate:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
 .generate {
@@ -251,6 +264,23 @@ h2 {
   gap: 0.2rem;
 }
 
+.palette-meta > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.palette-meta em {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--primary);
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 850;
+}
+
 .palette-meta small {
   color: var(--muted);
   line-height: 1.35;
@@ -266,6 +296,53 @@ h2 {
 
 .swatches i {
   display: block;
+}
+
+.color-values {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.15rem;
+}
+
+.color-value {
+  display: grid;
+  grid-template-columns: 1.85rem minmax(4.8rem, 0.8fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.6rem;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--surface), transparent 4%);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--muted), transparent 80%);
+  text-align: left;
+}
+
+.color-value span {
+  display: block;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--text), transparent 82%);
+}
+
+.color-value strong {
+  font-size: 0.82rem;
+}
+
+.color-value code {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-value.copied {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--secondary), transparent 28%);
 }
 
 .experience {
@@ -347,7 +424,10 @@ h2 {
   flex-wrap: wrap;
 }
 
-.example-actions button {
+.example-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 2.65rem;
   border-radius: 0.4rem;
   padding: 0 1rem;
@@ -722,6 +802,14 @@ h2 {
 @media (max-width: 440px) {
   .mood-grid {
     grid-template-columns: 1fr;
+  }
+
+  .color-value {
+    grid-template-columns: 1.55rem minmax(0, 1fr);
+  }
+
+  .color-value code {
+    grid-column: 2;
   }
 
   .rules-switch,

@@ -33,6 +33,17 @@ type SitePalette = {
 };
 
 type RuleView = "phi" | "thirds" | "contrast" | "blindness";
+type ColorRole = keyof SitePalette["colors"];
+
+const colorRoleLabels: Record<ColorRole, string> = {
+  bg: "Фон",
+  surface: "Поверхность",
+  text: "Текст",
+  muted: "Описание",
+  primary: "Основной",
+  secondary: "Вторичный",
+  accent: "Акцент",
+};
 
 const starterPalettes: SitePalette[] = [
   {
@@ -190,11 +201,26 @@ function App() {
   const [palettes, setPalettes] = React.useState(starterPalettes);
   const [selected, setSelected] = React.useState(starterPalettes[0]);
   const [ruleView, setRuleView] = React.useState<RuleView>("phi");
+  const [copiedColor, setCopiedColor] = React.useState<string | null>(null);
 
   const generate = () => {
+    if (prompt.trim().length < 3) {
+      return;
+    }
+
     const next = generatedPalettes(prompt, mood);
     setPalettes(next);
     setSelected(next[0]);
+    setCopiedColor(null);
+  };
+
+  const copyColor = async (color: string) => {
+    try {
+      await navigator.clipboard.writeText(color);
+      setCopiedColor(color);
+    } catch {
+      setCopiedColor(null);
+    }
   };
 
   return (
@@ -228,6 +254,7 @@ function App() {
             <textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
+              placeholder="Например: сервис аналитики, кофейня, детский центр"
               rows={4}
             />
           </label>
@@ -238,6 +265,7 @@ function App() {
                 className={item === mood ? "chip active" : "chip"}
                 key={item}
                 onClick={() => setMood(item)}
+                aria-pressed={item === mood}
                 type="button"
               >
                 {item}
@@ -245,7 +273,12 @@ function App() {
             ))}
           </div>
 
-          <button className="generate" onClick={generate} type="button">
+          <button
+            className="generate"
+            disabled={prompt.trim().length < 3}
+            onClick={generate}
+            type="button"
+          >
             <Wand2 size={18} />
             Сгенерировать
           </button>
@@ -256,10 +289,19 @@ function App() {
                 className={palette.id === selected.id ? "palette-card active" : "palette-card"}
                 key={palette.id}
                 onClick={() => setSelected(palette)}
+                aria-pressed={palette.id === selected.id}
                 type="button"
               >
                 <span className="palette-meta">
-                  <strong>{palette.name}</strong>
+                  <span>
+                    <strong>{palette.name}</strong>
+                    {palette.id === selected.id && (
+                      <em>
+                        <Check size={14} />
+                        Выбрано
+                      </em>
+                    )}
+                  </span>
                   <small>{palette.role}</small>
                 </span>
                 <span className="swatches" aria-hidden="true">
@@ -267,6 +309,22 @@ function App() {
                     <i key={color} style={{ background: color }} />
                   ))}
                 </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="color-values" aria-label="Значения выбранной палитры">
+            {Object.entries(selected.colors).map(([role, color]) => (
+              <button
+                className={copiedColor === color ? "color-value copied" : "color-value"}
+                key={`${role}-${color}`}
+                onClick={() => copyColor(color)}
+                title={`Скопировать ${color}`}
+                type="button"
+              >
+                <span style={{ background: color }} />
+                <strong>{colorRoleLabels[role as ColorRole]}</strong>
+                <code>{copiedColor === color ? "Скопировано" : color}</code>
               </button>
             ))}
           </div>
@@ -287,6 +345,7 @@ function App() {
                 className={ruleView === view.id ? "icon-toggle active" : "icon-toggle"}
                 key={view.id}
                 onClick={() => setRuleView(view.id)}
+                aria-pressed={ruleView === view.id}
                 title={view.label}
                 type="button"
               >
@@ -336,8 +395,8 @@ function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
             карточках, тексте и визуальных правилах ниже.
           </p>
           <div className="example-actions">
-            <button type="button">Начать подбор</button>
-            <button className="ghost" type="button">Смотреть правила</button>
+            <a href="#generator">Начать подбор</a>
+            <a className="ghost" href="#rules">Смотреть правила</a>
           </div>
         </div>
         <div className="example-visual" aria-hidden="true">
