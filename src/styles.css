@@ -419,8 +419,7 @@ h2 {
   color: var(--muted);
 }
 
-.thirds-overlay,
-.phi-overlay {
+.thirds-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -431,73 +430,6 @@ h2 {
   background:
     linear-gradient(90deg, transparent 33.2%, color-mix(in srgb, var(--primary), transparent 35%) 33.3%, transparent 33.5%, transparent 66.5%, color-mix(in srgb, var(--primary), transparent 35%) 66.6%, transparent 66.8%),
     linear-gradient(0deg, transparent 33.2%, color-mix(in srgb, var(--primary), transparent 35%) 33.3%, transparent 33.5%, transparent 66.5%, color-mix(in srgb, var(--primary), transparent 35%) 66.6%, transparent 66.8%);
-}
-
-.phi-overlay {
-  z-index: 3;
-}
-
-.phi-line {
-  position: absolute;
-  background: color-mix(in srgb, var(--accent), var(--text) 12%);
-  opacity: 0.74;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--surface), transparent 28%);
-}
-
-.phi-line.vertical {
-  left: 61.8%;
-  top: 0;
-  width: 2px;
-  height: 100%;
-}
-
-.phi-line.horizontal {
-  left: 0;
-  top: 61.8%;
-  width: 100%;
-  height: 2px;
-}
-
-.phi-label {
-  position: absolute;
-  display: grid;
-  min-height: 1.9rem;
-  place-items: center;
-  border-radius: 999px;
-  padding: 0 0.65rem;
-  background: color-mix(in srgb, var(--surface), transparent 8%);
-  color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--accent), transparent 34%);
-  font-size: 0.78rem;
-  font-weight: 850;
-  box-shadow: 0 0.7rem 1.7rem color-mix(in srgb, var(--text), transparent 90%);
-}
-
-.phi-label.main {
-  left: calc(30.9% - 2.2rem);
-  top: 1rem;
-}
-
-.phi-label.side {
-  left: calc(80.9% - 2.2rem);
-  top: 1rem;
-}
-
-.phi-label.bottom {
-  left: calc(61.8% + 0.7rem);
-  top: calc(61.8% + 0.7rem);
-}
-
-.phi-target {
-  position: absolute;
-  left: calc(61.8% - 0.42rem);
-  top: calc(61.8% - 0.42rem);
-  width: 0.84rem;
-  height: 0.84rem;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.9;
-  box-shadow: 0 0 0 0.65rem color-mix(in srgb, var(--accent), transparent 78%);
 }
 
 .rules {
@@ -551,67 +483,36 @@ h2 {
 
 .phi-demo {
   display: grid;
+  align-content: center;
+  gap: 1rem;
   place-items: center;
   padding: clamp(1rem, 3vw, 2rem);
-  background: color-mix(in srgb, var(--secondary), transparent 22%);
+  background: color-mix(in srgb, var(--surface), transparent 5%);
 }
 
-.golden-diagram {
-  width: min(100%, 50rem);
+.golden-image-frame {
+  display: grid;
+  width: min(100%, 34rem);
+  margin: 0;
+  place-items: center;
+  padding: clamp(0.6rem, 2vw, 1rem);
+  border-radius: 0.45rem;
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--text), transparent 72%);
+  box-shadow: 0 1rem 2.2rem color-mix(in srgb, var(--text), transparent 91%);
+}
+
+.golden-image-frame img {
+  display: block;
+  width: 100%;
   height: auto;
-  max-height: 23rem;
-  overflow: visible;
 }
 
-.golden-bg {
-  fill: color-mix(in srgb, var(--surface), transparent 8%);
-  stroke: color-mix(in srgb, var(--text), transparent 78%);
-  stroke-width: 2;
-}
-
-.golden-main {
-  fill: color-mix(in srgb, var(--primary), transparent 86%);
-  stroke: var(--primary);
-  stroke-width: 2;
-}
-
-.golden-side {
-  fill: color-mix(in srgb, var(--accent), transparent 85%);
-  stroke: var(--accent);
-  stroke-width: 2;
-}
-
-.golden-ratio-line {
-  stroke: color-mix(in srgb, var(--accent), var(--text) 12%);
-  stroke-width: 3;
-  stroke-dasharray: 10 9;
-}
-
-.golden-text,
-.golden-note {
-  fill: var(--text);
-  font-weight: 850;
-}
-
-.golden-text {
-  font-size: 28px;
-}
-
-.golden-note {
-  font-size: 22px;
-}
-
-.fib-grid rect {
-  fill: transparent;
-  stroke: color-mix(in srgb, var(--primary), transparent 18%);
-  stroke-width: 3;
-}
-
-.fib-spiral {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 8;
-  stroke-linecap: round;
+.phi-demo .visual-copy {
+  position: static;
+  width: min(100%, 34rem);
+  max-width: none;
+  box-shadow: none;
 }
 
 .thirds-demo {
