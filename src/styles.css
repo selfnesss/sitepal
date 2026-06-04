@@ -901,14 +901,10 @@ h2 {
 }
 
 .analysis-golden {
-  display: grid;
-  place-items: center;
-  padding: clamp(0.8rem, 3vw, 2rem);
-}
-
-.analysis-golden img {
-  width: min(96%, 58rem);
-  height: auto;
+  padding: clamp(0.75rem, 2vw, 1.4rem);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   opacity: 0.62;
   mix-blend-mode: multiply;
 }

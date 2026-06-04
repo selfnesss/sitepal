@@ -622,9 +622,11 @@ function AnalysisOverlay({ view }: { view: RuleView }) {
 
   if (view === "phi") {
     return (
-      <div className="analysis-golden" aria-hidden="true">
-        <img src={goldenSpiralImage} alt="" />
-      </div>
+      <div
+        className="analysis-golden"
+        style={{ backgroundImage: `url(${goldenSpiralImage})` }}
+        aria-hidden="true"
+      />
     );
   }
 
