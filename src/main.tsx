@@ -9,11 +9,14 @@ import {
   Gauge,
   Grid3X3,
   Layers3,
+  Loader2,
   Palette,
+  PanelRightOpen,
   Smartphone,
   Sparkles,
   Upload,
   Wand2,
+  X,
 } from "lucide-react";
 import goldenSpiralImage from "./assets/golden-spiral.svg";
 import "./styles.css";
@@ -35,6 +38,15 @@ type SitePalette = {
 
 type RuleView = "phi" | "thirds" | "contrast" | "blindness";
 type ColorRole = keyof SitePalette["colors"];
+type AiStatus = "idle" | "loading" | "done" | "error";
+
+type AiAnalysisResult = {
+  summary: string;
+  score: number;
+  strengths: string[];
+  issues: string[];
+  actions: string[];
+};
 
 const colorRoleLabels: Record<ColorRole, string> = {
   bg: "Фон",
@@ -108,7 +120,7 @@ const ruleViews: Array<{
   { id: "phi", label: "Сечение", icon: Layers3 },
   { id: "thirds", label: "Трети", icon: Grid3X3 },
   { id: "contrast", label: "Контраст", icon: Contrast },
-  { id: "blindness", label: "Слепота", icon: EyeOff },
+  { id: "blindness", label: "Баннеры", icon: EyeOff },
 ];
 
 const checkItems: Array<{
@@ -196,6 +208,53 @@ function colorVars(palette: SitePalette) {
   } as React.CSSProperties;
 }
 
+function normalizeUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+function screenshotUrlFor(url: string) {
+  return `https://image.thum.io/get/width/1440/crop/900/noanimate/${url}`;
+}
+
+async function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Не удалось прочитать файл"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function requestAiAnalysis({
+  imageDataUrl,
+  overlay,
+  screenshotUrl,
+  targetUrl,
+}: {
+  imageDataUrl: string | null;
+  overlay: RuleView;
+  screenshotUrl: string | null;
+  targetUrl: string | null;
+}) {
+  const response = await fetch("/api/ai/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageDataUrl, overlay, screenshotUrl, targetUrl }),
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.error || "AI-анализ сейчас не ответил");
+  }
+
+  return data as AiAnalysisResult;
+}
+
 function App() {
   const [prompt, setPrompt] = React.useState("онлайн-школа дизайна для начинающих");
   const [mood, setMood] = React.useState("спокойно");
@@ -203,9 +262,16 @@ function App() {
   const [selected, setSelected] = React.useState(starterPalettes[0]);
   const [ruleView, setRuleView] = React.useState<RuleView>("phi");
   const [copiedColor, setCopiedColor] = React.useState<string | null>(null);
+  const [analysisOpen, setAnalysisOpen] = React.useState(false);
   const [analysisInput, setAnalysisInput] = React.useState("");
-  const [analysisUrl, setAnalysisUrl] = React.useState<string | null>(null);
+  const [analysisTargetUrl, setAnalysisTargetUrl] = React.useState<string | null>(null);
   const [analysisImage, setAnalysisImage] = React.useState<string | null>(null);
+  const [analysisView, setAnalysisView] = React.useState<RuleView>("phi");
+  const [aiStatus, setAiStatus] = React.useState<AiStatus>("idle");
+  const [aiResult, setAiResult] = React.useState<AiAnalysisResult | null>(null);
+  const [aiError, setAiError] = React.useState("");
+
+  const previewUrl = analysisImage || (analysisTargetUrl ? screenshotUrlFor(analysisTargetUrl) : null);
 
   const generate = () => {
     if (prompt.trim().length < 3) {
@@ -228,37 +294,52 @@ function App() {
   };
 
   const openAnalysisUrl = () => {
-    const trimmed = analysisInput.trim();
-    if (!trimmed) {
+    const normalized = normalizeUrl(analysisInput);
+    if (!normalized) {
       return;
     }
 
-    const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-    setAnalysisUrl(normalized);
+    setAnalysisTargetUrl(normalized);
     setAnalysisImage(null);
+    setAiResult(null);
+    setAiError("");
   };
 
-  const loadAnalysisImage = (file?: File) => {
+  const loadAnalysisImage = async (file?: File) => {
     if (!file) {
       return;
     }
 
-    const nextImage = URL.createObjectURL(file);
-    setAnalysisImage((previous) => {
-      if (previous) {
-        URL.revokeObjectURL(previous);
-      }
-      return nextImage;
-    });
+    const nextImage = await fileToDataUrl(file);
+    setAnalysisImage(nextImage);
+    setAnalysisTargetUrl(null);
+    setAiResult(null);
+    setAiError("");
   };
 
-  React.useEffect(() => {
-    return () => {
-      if (analysisImage) {
-        URL.revokeObjectURL(analysisImage);
-      }
-    };
-  }, [analysisImage]);
+  const runAiAnalysis = async () => {
+    if (!analysisImage && !analysisTargetUrl) {
+      setAiStatus("error");
+      setAiError("Сначала добавьте скриншот или ссылку на сайт.");
+      return;
+    }
+
+    setAiStatus("loading");
+    setAiError("");
+    try {
+      const result = await requestAiAnalysis({
+        imageDataUrl: analysisImage,
+        overlay: analysisView,
+        screenshotUrl: analysisTargetUrl ? screenshotUrlFor(analysisTargetUrl) : null,
+        targetUrl: analysisTargetUrl,
+      });
+      setAiResult(result);
+      setAiStatus("done");
+    } catch (error) {
+      setAiStatus("error");
+      setAiError(error instanceof Error ? error.message : "AI-анализ сейчас недоступен");
+    }
+  };
 
   return (
     <main className="app" style={colorVars(selected)}>
@@ -273,6 +354,9 @@ function App() {
           <a href="#generator">Палитры</a>
           <a href="#experience">Пример</a>
           <a href="#rules">Правила</a>
+          <button className="nav-action" onClick={() => setAnalysisOpen(true)} type="button">
+            AI-анализ
+          </button>
         </nav>
       </header>
 
@@ -317,7 +401,7 @@ function App() {
             type="button"
           >
             <Wand2 size={18} />
-            Сгенерировать
+            <span>Сгенерировать</span>
           </button>
 
           <div className="palette-list">
@@ -367,14 +451,14 @@ function App() {
           </div>
         </aside>
 
-        <ExperienceSection ruleView={ruleView} />
+        <ExperienceSection onOpenAnalysis={() => setAnalysisOpen(true)} ruleView={ruleView} />
       </section>
 
       <section className="rules" id="rules">
         <div className="rules-heading">
           <div>
             <p>13 правил в действии</p>
-            <h2>Не статья, а визуальные проверки</h2>
+            <h2>Визуальные проверки без режима статьи</h2>
           </div>
           <div className="segmented rules-switch" aria-label="Визуализации правил">
             {ruleViews.map((view) => (
@@ -394,7 +478,7 @@ function App() {
         </div>
 
         <div className="rule-stage">
-          <RuleVisualization view={ruleView} />
+          <RuleVisualization view={ruleView} onOpenAnalysis={() => setAnalysisOpen(true)} />
           <div className="rule-checks">
             {checkItems.map(({ title, text, icon: Icon }) => (
               <article className="check-card" key={title}>
@@ -405,17 +489,26 @@ function App() {
             ))}
           </div>
         </div>
+      </section>
 
-        <AnalysisLab
+      {analysisOpen && (
+        <AnalysisWindow
+          aiError={aiError}
+          aiResult={aiResult}
+          aiStatus={aiStatus}
           image={analysisImage}
           input={analysisInput}
+          onClose={() => setAnalysisOpen(false)}
           onImageChange={loadAnalysisImage}
           onInputChange={setAnalysisInput}
+          onRunAi={runAiAnalysis}
           onUrlOpen={openAnalysisUrl}
-          url={analysisUrl}
-          view={ruleView}
+          onViewChange={setAnalysisView}
+          previewUrl={previewUrl}
+          targetUrl={analysisTargetUrl}
+          view={analysisView}
         />
-      </section>
+      )}
 
       <a className="to-top" href="#workspace" aria-label="Наверх">
         <ArrowUp size={20} />
@@ -424,12 +517,24 @@ function App() {
   );
 }
 
-function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
+function ExperienceSection({
+  onOpenAnalysis,
+  ruleView,
+}: {
+  onOpenAnalysis: () => void;
+  ruleView: RuleView;
+}) {
   return (
     <section className="experience" id="experience" aria-label="Живой пример сайта">
       <div className="experience-heading">
-        <p>Живой пример</p>
-        <h2>Этот сайт и есть пример выбранной палитры</h2>
+        <div>
+          <p>Живой пример</p>
+          <h2>Этот сайт меняется вместе с выбранной палитрой</h2>
+        </div>
+        <button className="compact-action" onClick={onOpenAnalysis} type="button">
+          <PanelRightOpen size={17} />
+          <span>Открыть анализ</span>
+        </button>
       </div>
 
       <section className="example-hero">
@@ -443,7 +548,9 @@ function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
           </p>
           <div className="example-actions">
             <a href="#generator">Начать подбор</a>
-            <a className="ghost" href="#rules">Смотреть правила</a>
+            <button className="ghost-button" onClick={onOpenAnalysis} type="button">
+              Проверить сайт
+            </button>
           </div>
         </div>
         <div className="example-visual" aria-hidden="true">
@@ -471,7 +578,13 @@ function ExperienceSection({ ruleView }: { ruleView: RuleView }) {
   );
 }
 
-function RuleVisualization({ view }: { view: RuleView }) {
+function RuleVisualization({
+  onOpenAnalysis,
+  view,
+}: {
+  onOpenAnalysis: () => void;
+  view: RuleView;
+}) {
   if (view === "thirds") {
     return (
       <div className="visual-card thirds-demo">
@@ -479,6 +592,9 @@ function RuleVisualization({ view }: { view: RuleView }) {
         <div className="visual-copy">
           <strong>Правило третей</strong>
           <p>Ключевые объекты попадают в точки пересечения, взгляд считывает экран быстрее.</p>
+          <button onClick={onOpenAnalysis} type="button">
+            Проверить свой сайт
+          </button>
         </div>
       </div>
     );
@@ -523,7 +639,10 @@ function RuleVisualization({ view }: { view: RuleView }) {
       </figure>
       <div className="visual-copy">
         <strong>Золотое сечение</strong>
-        <p>Вместо самодельной схемы используется готовое изображение золотого прямоугольника со спиралью.</p>
+        <p>Схема вписана в прямоугольник Фибоначчи и не растягивается под чужой размер.</p>
+        <button onClick={onOpenAnalysis} type="button">
+          Открыть окно анализа
+        </button>
       </div>
     </div>
   );
@@ -540,78 +659,201 @@ function ThirdsOverlay() {
   );
 }
 
-function AnalysisLab({
+function AnalysisWindow({
+  aiError,
+  aiResult,
+  aiStatus,
   image,
   input,
+  onClose,
   onImageChange,
   onInputChange,
+  onRunAi,
   onUrlOpen,
-  url,
+  onViewChange,
+  previewUrl,
+  targetUrl,
   view,
 }: {
+  aiError: string;
+  aiResult: AiAnalysisResult | null;
+  aiStatus: AiStatus;
   image: string | null;
   input: string;
+  onClose: () => void;
   onImageChange: (file?: File) => void;
   onInputChange: (value: string) => void;
+  onRunAi: () => void;
   onUrlOpen: () => void;
-  url: string | null;
+  onViewChange: (view: RuleView) => void;
+  previewUrl: string | null;
+  targetUrl: string | null;
   view: RuleView;
 }) {
-  return (
-    <section className="analysis-lab" aria-label="Анализ чужого сайта">
-      <div className="analysis-heading">
-        <div>
-          <p>Анализ сайта</p>
-          <h2>Подставьте сайт или скриншот под выбранное правило</h2>
-        </div>
-        <div className="analysis-controls">
-          <label className="analysis-url">
-            <span>URL</span>
-            <input
-              value={input}
-              onChange={(event) => onInputChange(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onUrlOpen();
-                }
-              }}
-              placeholder="https://example.com"
-            />
-          </label>
-          <button className="analysis-action" onClick={onUrlOpen} type="button">
-            Открыть
-          </button>
-          <label className="analysis-upload">
-            <Upload size={17} />
-            Скриншот
-            <input
-              accept="image/*"
-              onChange={(event) => onImageChange(event.target.files?.[0])}
-              type="file"
-            />
-          </label>
-        </div>
-      </div>
+  React.useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
 
-      <div className="analysis-frame">
-        {image ? (
-          <img className="analysis-image" src={image} alt="Скриншот сайта для анализа" />
-        ) : url ? (
-          <iframe
-            src={url}
-            title="Сайт для анализа композиции"
-            loading="lazy"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-          />
-        ) : (
-          <div className="analysis-empty">
-            <strong>Добавьте URL или скриншот</strong>
-            <span>Поверх сайта появится выбранная рамка: сечение, трети, контраст или зона баннерной слепоты.</span>
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  return (
+    <section className="analysis-modal" aria-label="Окно анализа сайта" role="dialog">
+      <div className="analysis-window">
+        <header className="analysis-top">
+          <div>
+            <p>AI-анализ композиции</p>
+            <h2>Проверьте сайт через сечение и разметку</h2>
           </div>
-        )}
-        <AnalysisOverlay view={view} />
+          <button className="icon-close" onClick={onClose} aria-label="Закрыть анализ" type="button">
+            <X size={21} />
+          </button>
+        </header>
+
+        <div className="analysis-layout">
+          <aside className="analysis-sidebar">
+            <label className="analysis-url">
+              <span>URL</span>
+              <input
+                value={input}
+                onChange={(event) => onInputChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    onUrlOpen();
+                  }
+                }}
+                placeholder="site.ru"
+              />
+            </label>
+
+            <div className="analysis-button-row">
+              <button className="analysis-action" onClick={onUrlOpen} type="button">
+                Открыть ссылку
+              </button>
+              <label className="analysis-upload">
+                <Upload size={17} />
+                Скриншот
+                <input
+                  accept="image/*"
+                  onChange={(event) => onImageChange(event.target.files?.[0])}
+                  type="file"
+                />
+              </label>
+            </div>
+
+            <div className="analysis-mode-list" aria-label="Разметка анализа">
+              {ruleViews.map((item) => (
+                <button
+                  className={view === item.id ? "analysis-mode active" : "analysis-mode"}
+                  key={item.id}
+                  onClick={() => onViewChange(item.id)}
+                  aria-pressed={view === item.id}
+                  type="button"
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="ai-run"
+              disabled={aiStatus === "loading"}
+              onClick={onRunAi}
+              type="button"
+            >
+              {aiStatus === "loading" ? <Loader2 className="spin" size={18} /> : <Sparkles size={18} />}
+              <span>{aiStatus === "loading" ? "Анализирую" : "Получить рекомендации"}</span>
+            </button>
+
+            <AiResult error={aiError} result={aiResult} status={aiStatus} />
+          </aside>
+
+          <div className="analysis-canvas-shell">
+            <div className="analysis-source">
+              <span>{image ? "Скриншот" : targetUrl || "Нет источника"}</span>
+            </div>
+            <div className="analysis-canvas">
+              {previewUrl ? (
+                <img className="analysis-preview" src={previewUrl} alt="Сайт для анализа" />
+              ) : (
+                <div className="analysis-empty">
+                  <strong>Добавьте URL или скриншот</strong>
+                  <span>Разметка появится поверх изображения, а AI даст рекомендации по композиции.</span>
+                </div>
+              )}
+              <AnalysisOverlay view={view} />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
+  );
+}
+
+function AiResult({
+  error,
+  result,
+  status,
+}: {
+  error: string;
+  result: AiAnalysisResult | null;
+  status: AiStatus;
+}) {
+  if (status === "error") {
+    return (
+      <div className="ai-result error">
+        <strong>Не получилось</strong>
+        <span>{error}</span>
+      </div>
+    );
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="ai-result muted">
+        <strong>Смотрю композицию</strong>
+        <span>Проверяю иерархию, попадание в точки внимания, CTA, контраст и перегруженные зоны.</span>
+      </div>
+    );
+  }
+
+  if (!result) {
+    return (
+      <div className="ai-result muted">
+        <strong>Рекомендации появятся здесь</strong>
+        <span>Лучше загрузить скриншот: так AI видит реальный экран, а не только адрес сайта.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ai-result">
+      <div className="ai-score">
+        <strong>{result.score}/100</strong>
+        <span>{result.summary}</span>
+      </div>
+      <ResultList title="Сильные стороны" items={result.strengths} />
+      <ResultList title="Проблемы" items={result.issues} />
+      <ResultList title="Что поправить" items={result.actions} />
+    </div>
+  );
+}
+
+function ResultList({ items, title }: { items: string[]; title: string }) {
+  return (
+    <div className="result-list">
+      <strong>{title}</strong>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -622,11 +864,11 @@ function AnalysisOverlay({ view }: { view: RuleView }) {
 
   if (view === "phi") {
     return (
-      <div
-        className="analysis-golden"
-        style={{ backgroundImage: `url(${goldenSpiralImage})` }}
-        aria-hidden="true"
-      />
+      <div className="analysis-golden" aria-hidden="true">
+        <div className="golden-ratio-box">
+          <img src={goldenSpiralImage} alt="" />
+        </div>
+      </div>
     );
   }
 
