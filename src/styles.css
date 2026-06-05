@@ -1119,9 +1119,10 @@ h2 {
 
 .analysis-golden img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 108%;
+  height: 108%;
   object-fit: fill;
+  transform: translate(-4%, -4%);
 }
 
 .analysis-contrast {
