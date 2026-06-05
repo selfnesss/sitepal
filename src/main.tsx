@@ -136,68 +136,6 @@ const checkItems: Array<{
   { title: "Адаптив", text: "одна палитра проверяется на трех размерах", icon: Smartphone },
 ];
 
-function hashText(value: string) {
-  return value.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-}
-
-function hsl(h: number, s: number, l: number) {
-  return `hsl(${Math.round((h + 360) % 360)} ${Math.round(s)}% ${Math.round(l)}%)`;
-}
-
-function generatedPalettes(prompt: string, mood: string): SitePalette[] {
-  const base = hashText(`${prompt}-${mood || "sitepal"}`) % 360;
-  const families = [
-    {
-      name: "Clear Signal",
-      role: "контрастная основа для CTA и навигации",
-      bg: hsl(base + 38, 38, 96),
-      surface: "#ffffff",
-      text: hsl(base + 205, 36, 13),
-      muted: hsl(base + 208, 13, 43),
-      primary: hsl(base, 67, 38),
-      secondary: hsl(base + 10, 46, 90),
-      accent: hsl(base + 118, 66, 42),
-    },
-    {
-      name: "Soft Trust",
-      role: "мягкая палитра для экспертного сайта",
-      bg: hsl(base + 168, 28, 95),
-      surface: hsl(base + 168, 30, 99),
-      text: hsl(base + 224, 32, 16),
-      muted: hsl(base + 223, 12, 46),
-      primary: hsl(base + 190, 54, 32),
-      secondary: hsl(base + 190, 35, 88),
-      accent: hsl(base + 28, 72, 47),
-    },
-    {
-      name: "Bold Product",
-      role: "выразительная схема для первого экрана",
-      bg: hsl(base + 250, 25, 12),
-      surface: hsl(base + 250, 23, 18),
-      text: hsl(base + 55, 46, 94),
-      muted: hsl(base + 48, 18, 70),
-      primary: hsl(base + 52, 82, 56),
-      secondary: hsl(base + 250, 18, 25),
-      accent: hsl(base + 162, 74, 54),
-    },
-  ];
-
-  return families.map((item, index) => ({
-    id: `${hashText(prompt + mood)}-${index}`,
-    name: item.name,
-    role: item.role,
-    colors: {
-      bg: item.bg,
-      surface: item.surface,
-      text: item.text,
-      muted: item.muted,
-      primary: item.primary,
-      secondary: item.secondary,
-      accent: item.accent,
-    },
-  }));
-}
-
 function colorVars(palette: SitePalette) {
   return {
     "--page": palette.colors.bg,
@@ -257,11 +195,28 @@ async function requestAiAnalysis({
   return data as AiAnalysisResult;
 }
 
+async function requestAiPalettes(prompt: string, mood: string) {
+  const response = await fetch("/api/ai/palettes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, mood }),
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.error || "AI-подбор сейчас не ответил");
+  }
+
+  return data.palettes as SitePalette[];
+}
+
 function App() {
   const [prompt, setPrompt] = React.useState("онлайн-школа дизайна для начинающих");
   const [mood, setMood] = React.useState("спокойно");
   const [palettes, setPalettes] = React.useState(starterPalettes);
   const [selected, setSelected] = React.useState(starterPalettes[0]);
+  const [paletteStatus, setPaletteStatus] = React.useState<AiStatus>("idle");
+  const [paletteError, setPaletteError] = React.useState("");
   const [ruleView, setRuleView] = React.useState<RuleView>("phi");
   const [copiedColor, setCopiedColor] = React.useState<string | null>(null);
   const [analysisOpen, setAnalysisOpen] = React.useState(false);
@@ -273,15 +228,23 @@ function App() {
   const [aiResult, setAiResult] = React.useState<AiAnalysisResult | null>(null);
   const [aiError, setAiError] = React.useState("");
 
-  const generate = () => {
+  const generate = async () => {
     if (prompt.trim().length < 3) {
       return;
     }
 
-    const next = generatedPalettes(prompt, mood);
-    setPalettes(next);
-    setSelected(next[0]);
-    setCopiedColor(null);
+    setPaletteStatus("loading");
+    setPaletteError("");
+    try {
+      const next = await requestAiPalettes(prompt, mood);
+      setPalettes(next);
+      setSelected(next[0]);
+      setCopiedColor(null);
+      setPaletteStatus("done");
+    } catch (error) {
+      setPaletteStatus("error");
+      setPaletteError(error instanceof Error ? error.message : "AI-подбор сейчас недоступен");
+    }
   };
 
   const copyColor = async (color: string) => {
@@ -396,13 +359,15 @@ function App() {
 
           <button
             className="generate"
-            disabled={prompt.trim().length < 3}
+            disabled={prompt.trim().length < 3 || paletteStatus === "loading"}
             onClick={generate}
             type="button"
           >
-            <Wand2 size={18} />
-            <span>Сгенерировать</span>
+            {paletteStatus === "loading" ? <Loader2 className="spin" size={18} /> : <Wand2 size={18} />}
+            <span>{paletteStatus === "loading" ? "Генерирую" : "Сгенерировать"}</span>
           </button>
+
+          {paletteStatus === "error" && <p className="palette-error">{paletteError}</p>}
 
           <div className="palette-list">
             {palettes.map((palette) => (
@@ -560,18 +525,25 @@ function ExperienceSection({
         </div>
       </section>
 
-      <div className="example-grid">
-        {[
-          ["Композиция", "сетки и пропорции видны на странице"],
-          ["Контраст", "кнопки и текст проверяются сразу"],
-          ["Адаптив", "блоки перестраиваются без отдельного макета"],
-        ].map(([title, text]) => (
-          <article key={title}>
+      <div className="palette-samples" aria-label="Примеры интерфейса в выбранной палитре">
+        <article className="sample-card sample-cta">
+          <span>CTA</span>
+          <strong>Основное действие</strong>
+          <button type="button">Записаться</button>
+        </article>
+        <article className="sample-card sample-text">
+          <span>Текст</span>
+          <strong>Заголовок блока</strong>
+          <p>Описание остается читаемым на фоне и показывает, насколько мягко работает muted-цвет.</p>
+        </article>
+        <article className="sample-card sample-product">
+          <span>Карточка</span>
+          <div>
             <i />
-            <strong>{title}</strong>
-            <span>{text}</span>
-          </article>
-        ))}
+            <strong>Тариф Studio</strong>
+            <p>Акцент, вторичный фон и текст собираются в один рабочий компонент.</p>
+          </div>
+        </article>
       </div>
     </section>
   );

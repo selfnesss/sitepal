@@ -282,6 +282,17 @@ h2 {
   gap: 0.7rem;
 }
 
+.palette-error {
+  margin: -0.25rem 0 0;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, #ba3b2d, transparent 58%);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, #ba3b2d, transparent 92%);
+  color: #8f2f25;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .palette-card {
   display: grid;
   width: 100%;
@@ -341,10 +352,13 @@ h2 {
   overflow: hidden;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   border-radius: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--text), transparent 88%);
+  background: color-mix(in srgb, var(--muted), transparent 86%);
 }
 
 .swatches i {
   display: block;
+  min-width: 0;
 }
 
 .color-values {
@@ -533,31 +547,76 @@ h2 {
   background: color-mix(in srgb, var(--surface), var(--accent) 16%);
 }
 
-.example-grid {
+.palette-samples {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.example-grid article {
+.sample-card {
   display: grid;
-  min-height: 9.4rem;
-  gap: 0.4rem;
-  padding: 1rem;
+  min-height: 10rem;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 1.05rem;
   border: 1px solid color-mix(in srgb, var(--muted), transparent 80%);
   border-radius: 0.5rem;
   background: var(--surface);
 }
 
-.example-grid i {
-  width: 2.1rem;
-  height: 2.1rem;
+.sample-card > span {
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.sample-card strong {
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  line-height: 1.1;
+}
+
+.sample-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.sample-cta button {
+  justify-self: start;
+  min-height: 2.55rem;
+  border: 0;
+  border-radius: 0.45rem;
+  padding: 0 1rem;
+  background: var(--primary);
+  color: var(--surface);
+  font-weight: 850;
+}
+
+.sample-text {
+  background: color-mix(in srgb, var(--secondary), var(--surface) 58%);
+}
+
+.sample-product {
+  grid-template-columns: 3.2rem minmax(0, 1fr);
+  align-items: start;
+}
+
+.sample-product > span {
+  grid-column: 1 / -1;
+}
+
+.sample-product i {
+  width: 3.2rem;
+  height: 3.2rem;
   border-radius: 0.45rem;
   background: var(--accent);
 }
 
-.example-grid span {
-  color: var(--muted);
+.sample-product div {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
 }
 
 .thirds-overlay {
@@ -1211,7 +1270,7 @@ h2 {
     min-height: 12rem;
   }
 
-  .example-grid,
+  .palette-samples,
   .contrast-demo {
     grid-template-columns: 1fr;
   }
