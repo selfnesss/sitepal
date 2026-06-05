@@ -1064,12 +1064,21 @@ h2 {
   background: #ffffff;
 }
 
-.analysis-preview {
+.analysis-preview,
+.analysis-site-frame {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  border: 0;
   background: #ffffff;
+}
+
+.analysis-preview {
+  object-fit: cover;
+}
+
+.analysis-site-frame {
+  overflow: auto;
 }
 
 .analysis-empty {

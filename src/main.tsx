@@ -271,8 +271,6 @@ function App() {
   const [aiResult, setAiResult] = React.useState<AiAnalysisResult | null>(null);
   const [aiError, setAiError] = React.useState("");
 
-  const previewUrl = analysisImage || (analysisTargetUrl ? screenshotUrlFor(analysisTargetUrl) : null);
-
   const generate = () => {
     if (prompt.trim().length < 3) {
       return;
@@ -504,7 +502,6 @@ function App() {
           onRunAi={runAiAnalysis}
           onUrlOpen={openAnalysisUrl}
           onViewChange={setAnalysisView}
-          previewUrl={previewUrl}
           targetUrl={analysisTargetUrl}
           view={analysisView}
         />
@@ -671,7 +668,6 @@ function AnalysisWindow({
   onRunAi,
   onUrlOpen,
   onViewChange,
-  previewUrl,
   targetUrl,
   view,
 }: {
@@ -686,7 +682,6 @@ function AnalysisWindow({
   onRunAi: () => void;
   onUrlOpen: () => void;
   onViewChange: (view: RuleView) => void;
-  previewUrl: string | null;
   targetUrl: string | null;
   view: RuleView;
 }) {
@@ -778,8 +773,16 @@ function AnalysisWindow({
               <span>{image ? "Скриншот" : targetUrl || "Нет источника"}</span>
             </div>
             <div className="analysis-canvas">
-              {previewUrl ? (
-                <img className="analysis-preview" src={previewUrl} alt="Сайт для анализа" />
+              {image ? (
+                <img className="analysis-preview" src={image} alt="Скриншот сайта для анализа" />
+              ) : targetUrl ? (
+                <iframe
+                  className="analysis-site-frame"
+                  src={targetUrl}
+                  title="Сайт для анализа"
+                  loading="lazy"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation"
+                />
               ) : (
                 <div className="analysis-empty">
                   <strong>Добавьте URL или скриншот</strong>
