@@ -123,6 +123,8 @@ const ruleViews: Array<{
   { id: "blindness", label: "Баннеры", icon: EyeOff },
 ];
 
+const analysisViews = ruleViews.filter((view) => view.id === "phi" || view.id === "thirds");
+
 const checkItems: Array<{
   title: string;
   text: string;
@@ -741,7 +743,7 @@ function AnalysisWindow({
             </div>
 
             <div className="analysis-mode-list" aria-label="Разметка анализа">
-              {ruleViews.map((item) => (
+              {analysisViews.map((item) => (
                 <button
                   className={view === item.id ? "analysis-mode active" : "analysis-mode"}
                   key={item.id}
@@ -873,16 +875,7 @@ function AnalysisOverlay({ view }: { view: RuleView }) {
     );
   }
 
-  if (view === "contrast") {
-    return <div className="analysis-contrast" aria-hidden="true" />;
-  }
-
-  return (
-    <div className="analysis-blindness" aria-hidden="true">
-      <span />
-      <span />
-    </div>
-  );
+  return null;
 }
 
 createRoot(document.getElementById("root")!).render(
