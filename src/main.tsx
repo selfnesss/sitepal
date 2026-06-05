@@ -868,20 +868,13 @@ function AnalysisOverlay({ view }: { view: RuleView }) {
   if (view === "phi") {
     return (
       <div className="analysis-golden" aria-hidden="true">
-        <div className="golden-ratio-box">
-          <img src={goldenSpiralImage} alt="" />
-        </div>
+        <img src={goldenSpiralImage} alt="" />
       </div>
     );
   }
 
   if (view === "contrast") {
-    return (
-      <div className="analysis-contrast" aria-hidden="true">
-        <span />
-        <span />
-      </div>
-    );
+    return <div className="analysis-contrast" aria-hidden="true" />;
   }
 
   return (

@@ -1113,20 +1113,11 @@ h2 {
 }
 
 .analysis-golden {
-  display: grid;
-  place-items: center;
-  opacity: 0.68;
+  opacity: 0.56;
   mix-blend-mode: multiply;
 }
 
-.golden-ratio-box {
-  width: min(94cqw, 148.856cqh);
-  aspect-ratio: 1.618 / 1;
-  border: 2px solid rgb(20 20 20 / 0.72);
-  background: rgb(255 255 255 / 0.08);
-}
-
-.golden-ratio-box img {
+.analysis-golden img {
   display: block;
   width: 100%;
   height: 100%;
@@ -1135,29 +1126,13 @@ h2 {
 
 .analysis-contrast {
   background:
-    linear-gradient(90deg, rgb(0 0 0 / 0.28), transparent 34%, transparent 66%, rgb(255 255 255 / 0.38)),
-    linear-gradient(0deg, transparent 50%, rgb(255 42 31 / 0.28) 50%, transparent calc(50% + 2px));
+    linear-gradient(90deg, rgb(0 0 0 / 0.2), transparent 24%, transparent 76%, rgb(255 255 255 / 0.28)),
+    linear-gradient(0deg, transparent calc(50% - 1px), rgb(255 42 31 / 0.34) calc(50% - 1px), rgb(255 42 31 / 0.34) calc(50% + 1px), transparent calc(50% + 1px));
 }
 
-.analysis-contrast span:first-child,
-.analysis-contrast span:last-child,
 .analysis-blindness span {
   position: absolute;
   border: 2px solid #ff2a1f;
-}
-
-.analysis-contrast span:first-child {
-  top: 10%;
-  left: 6%;
-  width: 36%;
-  height: 20%;
-}
-
-.analysis-contrast span:last-child {
-  right: 6%;
-  bottom: 10%;
-  width: 36%;
-  height: 20%;
 }
 
 .analysis-blindness {
