@@ -399,21 +399,24 @@ function App() {
             ))}
           </div>
 
-          <div className="color-values" aria-label="Значения выбранной палитры">
-            {Object.entries(selected.colors).map(([role, color]) => (
-              <button
-                className={copiedColor === color ? "color-value copied" : "color-value"}
-                key={`${role}-${color}`}
-                onClick={() => copyColor(color)}
-                title={`Скопировать ${color}`}
-                type="button"
-              >
-                <span style={{ background: color }} />
-                <strong>{colorRoleLabels[role as ColorRole]}</strong>
-                <code>{copiedColor === color ? "Скопировано" : color}</code>
-              </button>
-            ))}
-          </div>
+          <details className="color-details">
+            <summary>Коды цветов</summary>
+            <div className="color-values" aria-label="Значения выбранной палитры">
+              {Object.entries(selected.colors).map(([role, color]) => (
+                <button
+                  className={copiedColor === color ? "color-value copied" : "color-value"}
+                  key={`${role}-${color}`}
+                  onClick={() => copyColor(color)}
+                  title={`Скопировать ${color}`}
+                  type="button"
+                >
+                  <span style={{ background: color }} />
+                  <strong>{colorRoleLabels[role as ColorRole]}</strong>
+                  <code>{copiedColor === color ? "Скопировано" : color}</code>
+                </button>
+              ))}
+            </div>
+          </details>
         </aside>
 
         <ExperienceSection onOpenAnalysis={() => setAnalysisOpen(true)} ruleView={ruleView} />
@@ -503,48 +506,56 @@ function ExperienceSection({
 
       <section className="example-hero">
         {ruleView === "thirds" && <ThirdsOverlay />}
-        <div className="example-copy">
-          <span className="eyebrow">Дизайн без хаоса</span>
-          <h3>Подберите палитру и сразу почувствуйте сайт</h3>
-          <p>
-            Цвета проверяются на настоящем интерфейсе: фоне, навигации, кнопках,
-            карточках, тексте и визуальных правилах ниже.
-          </p>
-          <div className="example-actions">
-            <a href="#generator">Начать подбор</a>
-            <button className="ghost-button" onClick={onOpenAnalysis} type="button">
-              Проверить сайт
-            </button>
-          </div>
+        <div className="preview-topline">
+          <strong>Studio</strong>
+          <nav aria-label="Превью навигации">
+            <span>Услуги</span>
+            <span>Кейсы</span>
+            <span>Контакты</span>
+          </nav>
         </div>
-        <div className="example-visual" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
+
+        <div className="preview-hero">
+          <div className="preview-copy">
+            <span className="eyebrow">Живой макет</span>
+            <h3>Палитра на реальном макете</h3>
+            <p>
+              Сразу видно, как работают фон, текст, CTA, карточки и акцент.
+            </p>
+            <div className="example-actions">
+              <a href="#generator">Подобрать цвета</a>
+              <button className="ghost-button" onClick={onOpenAnalysis} type="button">
+                Анализ сайта
+              </button>
+            </div>
+          </div>
+
+          <aside className="preview-panel" aria-label="Пример карточки">
+            <span>Заявка</span>
+            <strong>Консультация по проекту</strong>
+            <p>Короткая карточка показывает читаемость текста и состояние вторичного фона.</p>
+            <button type="button">Отправить</button>
+          </aside>
+        </div>
+
+        <div className="preview-grid">
+          <article>
+            <span>01</span>
+            <strong>Заголовок</strong>
+            <p>Проверка основного текста и muted-описаний.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>Акцент</strong>
+            <p>Показывает, не спорит ли дополнительный цвет с CTA.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>Карточка</strong>
+            <p>Оценивает границы, фон и плотность интерфейса.</p>
+          </article>
         </div>
       </section>
-
-      <div className="palette-samples" aria-label="Примеры интерфейса в выбранной палитре">
-        <article className="sample-card sample-cta">
-          <span>CTA</span>
-          <strong>Основное действие</strong>
-          <button type="button">Записаться</button>
-        </article>
-        <article className="sample-card sample-text">
-          <span>Текст</span>
-          <strong>Заголовок блока</strong>
-          <p>Описание остается читаемым на фоне и показывает, насколько мягко работает muted-цвет.</p>
-        </article>
-        <article className="sample-card sample-product">
-          <span>Карточка</span>
-          <div>
-            <i />
-            <strong>Тариф Studio</strong>
-            <p>Акцент, вторичный фон и текст собираются в один рабочий компонент.</p>
-          </div>
-        </article>
-      </div>
     </section>
   );
 }
