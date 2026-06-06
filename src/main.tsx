@@ -371,52 +371,55 @@ function App() {
 
           <div className="palette-list">
             {palettes.map((palette) => (
-              <button
+              <article
                 className={palette.id === selected.id ? "palette-card active" : "palette-card"}
                 key={palette.id}
-                onClick={() => setSelected(palette)}
-                aria-pressed={palette.id === selected.id}
-                type="button"
               >
-                <span className="palette-meta">
-                  <span>
-                    <strong>{palette.name}</strong>
-                    {palette.id === selected.id && (
-                      <em>
-                        <Check size={14} />
-                        Выбрано
-                      </em>
-                    )}
-                  </span>
-                  <small>{palette.role}</small>
-                </span>
-                <span className="swatches" aria-hidden="true">
-                  {Object.values(palette.colors).map((color) => (
-                    <i key={color} style={{ background: color }} />
-                  ))}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          <details className="color-details">
-            <summary>Коды цветов</summary>
-            <div className="color-values" aria-label="Значения выбранной палитры">
-              {Object.entries(selected.colors).map(([role, color]) => (
                 <button
-                  className={copiedColor === color ? "color-value copied" : "color-value"}
-                  key={`${role}-${color}`}
-                  onClick={() => copyColor(color)}
-                  title={`Скопировать ${color}`}
+                  className="palette-select"
+                  onClick={() => setSelected(palette)}
+                  aria-pressed={palette.id === selected.id}
                   type="button"
                 >
-                  <span style={{ background: color }} />
-                  <strong>{colorRoleLabels[role as ColorRole]}</strong>
-                  <code>{copiedColor === color ? "Скопировано" : color}</code>
+                  <span className="palette-meta">
+                    <span>
+                      <strong>{palette.name}</strong>
+                      {palette.id === selected.id && (
+                        <em>
+                          <Check size={14} />
+                          Выбрано
+                        </em>
+                      )}
+                    </span>
+                    <small>{palette.role}</small>
+                  </span>
+                  <span className="swatches" aria-hidden="true">
+                    {Object.values(palette.colors).map((color) => (
+                      <i key={color} style={{ background: color }} />
+                    ))}
+                  </span>
                 </button>
-              ))}
-            </div>
-          </details>
+
+                {palette.id === selected.id && (
+                  <div className="palette-inline-codes" aria-label="Коды выбранной палитры">
+                    {Object.entries(palette.colors).map(([role, color]) => (
+                      <button
+                        className={copiedColor === color ? "inline-code copied" : "inline-code"}
+                        key={`${role}-${color}`}
+                        onClick={() => copyColor(color)}
+                        title={`Скопировать ${color}`}
+                        type="button"
+                      >
+                        <span style={{ background: color }} />
+                        <strong>{colorRoleLabels[role as ColorRole]}</strong>
+                        <code>{copiedColor === color ? "copied" : color}</code>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
         </aside>
 
         <ExperienceSection onOpenAnalysis={() => setAnalysisOpen(true)} ruleView={ruleView} />
