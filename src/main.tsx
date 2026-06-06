@@ -412,7 +412,7 @@ function App() {
                       >
                         <span style={{ background: color }} />
                         <strong>{colorRoleLabels[role as ColorRole]}</strong>
-                        <code>{copiedColor === color ? "copied" : color}</code>
+                        <code>{copiedColor === color ? "✓" : color}</code>
                       </button>
                     ))}
                   </div>

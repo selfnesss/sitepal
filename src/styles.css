@@ -373,53 +373,63 @@ h2 {
 
 .palette-inline-codes {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0;
   padding: 0 0.75rem 0.75rem;
 }
 
 .inline-code {
   display: grid;
   min-width: 0;
-  min-height: 2.45rem;
-  grid-template-columns: 1rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.2rem 0.4rem;
-  padding: 0.4rem;
-  border-radius: 0.4rem;
-  background: color-mix(in srgb, var(--secondary), transparent 52%);
+  min-height: 2.2rem;
+  grid-template-rows: 0.45rem minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: var(--surface);
   color: var(--text);
-  text-align: left;
+  text-align: center;
 }
 
 .inline-code span {
   display: block;
-  width: 1rem;
-  height: 1rem;
-  border: 1px solid color-mix(in srgb, var(--text), transparent 82%);
-  border-radius: 0.25rem;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
 }
 
 .inline-code strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  font-size: 0.74rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  clip: rect(0 0 0 0);
 }
 
 .inline-code code {
-  grid-column: 1 / -1;
   overflow: hidden;
   color: var(--muted);
   font-family: inherit;
-  font-size: 0.72rem;
+  font-size: clamp(0.48rem, 1vw, 0.62rem);
+  line-height: 1.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .inline-code.copied {
   border-color: var(--primary);
-  background: color-mix(in srgb, var(--secondary), transparent 28%);
+  background: color-mix(in srgb, var(--secondary), transparent 24%);
+}
+
+.palette-inline-codes .inline-code:first-child {
+  border-radius: 0.35rem 0 0 0.35rem;
+}
+
+.palette-inline-codes .inline-code:last-child {
+  border-radius: 0 0.35rem 0.35rem 0;
 }
 
 .experience {
