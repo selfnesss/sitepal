@@ -525,7 +525,10 @@ function ExperienceSection({
       <section className="example-hero">
         {ruleView === "thirds" && <ThirdsOverlay />}
         <div className="preview-topline">
-          <strong>Studio</strong>
+          <div className="preview-brand">
+            <strong>ST</strong>
+            <span>Studio</span>
+          </div>
           <nav aria-label="Превью навигации">
             <span>Услуги</span>
             <span>Кейсы</span>

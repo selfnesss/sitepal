@@ -490,19 +490,36 @@ h2 {
   border-bottom: 1px solid color-mix(in srgb, var(--muted), transparent 82%);
 }
 
-.preview-topline strong {
+.preview-brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--text);
+  font-weight: 850;
+}
+
+.preview-brand strong {
   display: inline-grid;
+  flex: 0 0 auto;
   width: 2.35rem;
   height: 2.35rem;
   place-items: center;
   border-radius: 0.4rem;
   background: var(--primary);
   color: var(--surface);
-  font-size: 0.9rem;
+  font-size: 0.78rem;
+}
+
+.preview-brand span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .preview-topline nav {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: clamp(0.8rem, 2vw, 1.5rem);
