@@ -422,7 +422,16 @@ function App() {
           </div>
         </aside>
 
-        <ExperienceSection onOpenAnalysis={() => setAnalysisOpen(true)} ruleView={ruleView} />
+        <ExperienceSection
+          analysisInput={analysisInput}
+          onAnalysisInputChange={setAnalysisInput}
+          onOpenAnalysis={() => setAnalysisOpen(true)}
+          onOpenAnalysisUrl={() => {
+            openAnalysisUrl();
+            setAnalysisOpen(true);
+          }}
+          ruleView={ruleView}
+        />
       </section>
 
       <section className="rules" id="rules">
@@ -488,10 +497,16 @@ function App() {
 }
 
 function ExperienceSection({
+  analysisInput,
+  onAnalysisInputChange,
   onOpenAnalysis,
+  onOpenAnalysisUrl,
   ruleView,
 }: {
+  analysisInput: string;
+  onAnalysisInputChange: (value: string) => void;
   onOpenAnalysis: () => void;
+  onOpenAnalysisUrl: () => void;
   ruleView: RuleView;
 }) {
   return (
@@ -558,6 +573,30 @@ function ExperienceSection({
             <p>Оценивает границы, фон и плотность интерфейса.</p>
           </article>
         </div>
+      </section>
+
+      <section className="quick-analysis" aria-label="Быстрый анализ сайта">
+        <div>
+          <span>AI-анализ</span>
+          <strong>Проверьте любой сайт по ссылке</strong>
+          <p>Откроем сайт в отдельном окне, наложим сетку и дадим рекомендации.</p>
+        </div>
+        <label className="quick-url">
+          <span>URL</span>
+          <input
+            value={analysisInput}
+            onChange={(event) => onAnalysisInputChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                onOpenAnalysisUrl();
+              }
+            }}
+            placeholder="site.ru"
+          />
+        </label>
+        <button className="quick-action" onClick={onOpenAnalysisUrl} type="button">
+          Открыть анализ
+        </button>
       </section>
     </section>
   );
